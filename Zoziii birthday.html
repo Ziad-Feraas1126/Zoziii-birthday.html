@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Countdown</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: #fff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(210, 160, 110, .45), transparent 34%),
+        radial-gradient(circle at 85% 80%, rgba(170, 115, 70, .42), transparent 34%),
+        #4a3426;
+    }
+    .wrap {
+      width: min(900px, 100%);
+      text-align: center;
+      padding: clamp(28px, 6vw, 64px);
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 28px;
+      background: rgba(255,255,255,.07);
+      box-shadow: 0 24px 80px rgba(0,0,0,.35);
+      backdrop-filter: blur(14px);
+    }
+    .eyebrow {
+      margin: 0 0 16px;
+      color: #f3dcc0;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0 0 34px;
+      font-size: clamp(2rem, 6vw, 4rem);
+      line-height: 1.08;
+      letter-spacing: -.04em;
+    }
+    .countdown {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: clamp(8px, 2vw, 18px);
+      margin-bottom: 30px;
+    }
+    .unit {
+      padding: clamp(14px, 3vw, 24px) 8px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.09);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .number {
+      display: block;
+      font-size: clamp(2rem, 7vw, 4.4rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .label {
+      display: block;
+      margin-top: 12px;
+      color: #ead5bd;
+      font-size: clamp(.65rem, 1.8vw, .85rem);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .message {
+      margin: 0;
+      font-size: clamp(1.15rem, 3.5vw, 1.8rem);
+      font-weight: 750;
+      color: #fbeedd;
+    }
+    .hearts { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .heart {
+      position: absolute;
+      bottom: -40px;
+      opacity: 0;
+      animation: floatUp linear forwards;
+      filter: drop-shadow(0 0 6px rgba(255, 90, 140, .5));
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) translateX(0) scale(.8); opacity: 0; }
+      10% { opacity: .9; }
+      50% { transform: translateY(-55vh) translateX(18px) scale(1); }
+      100% { transform: translateY(-115vh) translateX(-18px) scale(1.15); opacity: 0; }
+    }
+    .wrap { position: relative; z-index: 1; }
+    .birthday {
+      display: none;
+      margin: 0;
+      font-size: clamp(1.2rem, 4vw, 2rem);
+      font-weight: 750;
+      line-height: 1.6;
+      color: #fff;
+      animation: pop .9s ease both;
+    }
+    .done .countdown, .done .message { display: none; }
+    .done .birthday { display: block; }
+    .done h1 { display: none; }
+    @keyframes pop { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
+    .daily-image {
+      display: none;
+      max-width: min(320px, 100%);
+      max-height: 320px;
+      margin: 20px auto 0;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.2);
+    }
+    .done .daily-image { display: none !important; }
+    .music-btn {
+      display: none;
+      margin: 22px auto 0;
+      padding: 10px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.3);
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .yt-wrap { position: fixed; left: -9999px; top: 0; width: 200px; height: 200px; overflow: hidden; }
+    .music-btn:hover { background: rgba(255,255,255,.2); }
+    @media (max-width: 480px) {
+      .countdown { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts" id="hearts" aria-hidden="true"></div>
+  <main class="wrap" id="wrap">
+    <p class="eyebrow">Zoziiiii's Day'🎂✨</p>
+    <h1>26 / 11</h1>
+    <section class="countdown" aria-label="Countdown to November 26">
+      <div class="unit"><span class="number" id="days">00</span><span class="label">Days</span></div>
+      <div class="unit"><span class="number" id="hours">00</span><span class="label">Hours</span></div>
+      <div class="unit"><span class="number" id="minutes">00</span><span class="label">Minutes</span></div>
+      <div class="unit"><span class="number" id="seconds">00</span><span class="label">Seconds</span></div>
+    </section>
+    <p class="message">Dayes left yaa zoziiii🌝♥️</p>
+    <img class="daily-image" id="dailyImage" alt="">
+    <button class="music-btn" id="musicBtn" type="button">🎵 Play song</button>
+    <audio id="dailyAudio" loop preload="none"></audio>
+    <div class="yt-wrap" aria-hidden="true"><div id="ytPlayer"></div></div>
+    <p class="birthday" id="birthday">Happy birthday, my dear Zozzii! 🎉🎉♥️♥️<br>May you always be successful and excel in your life and studies, and I wish you happiness always. Happy birthday! 😊♥️✨<br>I know we haven't known each other for very long, but your friendship means so much to me. ♥️🫡</p>
+  </main>
+  <script>
+    // Countdown to midnight at the start of November 26, 2026 (local device time).
+    const target = new Date(2026, 10, 26, 0, 0, 0).getTime();
+    let finished = false;
+    const heartEmojis = ["♥️", "💖", "💗", "💕", "❤️"];
+    const heartsBox = document.getElementById("hearts");
+    function spawnHeart() {
+      const h = document.createElement("span");
+      h.className = "heart";
+      h.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+      h.style.left = Math.random() * 100 + "vw";
+      h.style.fontSize = (14 + Math.random() * 26) + "px";
+      const dur = 6 + Math.random() * 6;
+      h.style.animationDuration = dur + "s";
+      h.style.animationDelay = (Math.random() * 2) + "s";
+      heartsBox.appendChild(h);
+      setTimeout(() => h.remove(), (dur + 2.5) * 1000);
+    }
+    setInterval(spawnHeart, 450);
+    for (let i = 0; i < 12; i++) spawnHeart();
+    const ids = ["days", "hours", "minutes", "seconds"];
+    const defaultMessage = "Dayes left yaa zoziiii🌝♥️";
+    const dailyMessages = {
+      12: "12 days left yaa zoziiii🌝♥️",
+      11: "11 days left yaa zoziiii🌝♥️",
+      10: "10 days left yaa zoziiii🌝♥️",
+      9: "9 days left yaa zoziiii🌝♥️",
+      8: "8 days left yaa zoziiii🌝♥️",
+      7: "7 days left yaa zoziiii🌝♥️",
+      6: "6 days left yaa zoziiii🌝♥️",
+      5: "5 days left yaa zoziiii🌝♥️",
+      4: "4 days left yaa zoziiii🌝♥️",
+      3: "3 days left yaa zoziiii🌝♥️",
+      2: "2 days left yaa zoziiii🌝♥️",
+      1: "1 day left yaa zoziiii🌝♥️",
+      0: "Hours left yaa zoziiii🌝♥️"
+    };
+    const dailyImages = {
+    12: "https://i.ibb.co/5hWLJMwC/singing-cat-happy-birthday-gif.webp",
+    11: "https://example.com/photo2.jpg",
+    10: "https://example.com/photo3.jpg",
+    9: "https://example.com/photo4.jpg",
+    8: "https://example.com/photo5.jpg",
+    7: "https://example.com/photo6.jpg",
+    6: "https://example.com/photo7.jpg",
+    5: "https://example.com/photo8.jpg",
+    4: "https://example.com/photo9.jpg",
+    3: "https://example.com/photo10.jpg",
+    2: "https://example.com/photo11.jpg",
+    1: "https://example.com/photo12.jpg",
+    0: "https://example.com/photo13.jpg"
+    };
+    const dailySongs = {
+    12: "انا المتصدر (عندي عقل خارق _ العيون شغاله نبر) حمو المرشدي _ توزيع حمو التيفا.mp3",
+    11: "https://www.youtube.com/watch?v=YYYYYYYYYYY",
+    10: "https://www.youtube.com/watch?v=ZZZZZZZZZZZ",
+    9: "https://www.youtube.com/watch?v=AAAAAAAAAAA",
+    8: "https://www.youtube.com/watch?v=BBBBBBBBBBB",
+    7: "https://www.youtube.com/watch?v=CCCCCCCCCCC",
+    6: "https://www.youtube.com/watch?v=DDDDDDDDDDD",
+    5: "https://www.youtube.com/watch?v=EEEEEEEEEEE",
+    4: "https://www.youtube.com/watch?v=FFFFFFFFFFF",
+    3: "https://www.youtube.com/watch?v=GGGGGGGGGGG",
+    2: "https://www.youtube.com/watch?v=HHHHHHHHHHH",
+    1: "https://www.youtube.com/watch?v=IIIIIIIIIII",
+    0: "https://www.youtube.com/watch?v=JJJJJJJJJJJ",
+    };
+    const musicBtn = document.getElementById("musicBtn");
+    const audio = document.getElementById("dailyAudio");
+    let player = null, playerReady = false, currentId = null, todayId = null, todayMp3 = null, wantMusic = false;
+    function getYouTubeId(u) {
+      const m = String(u).match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
+      if (m) return m[1];
+      return /^[\w-]{11}$/.test(u) ? u : null;
+    }
+    function isPlaying() {
+      if (todayMp3) return !audio.paused;
+      return playerReady && player.getPlayerState() === 1;
+    }
+    function setBtnLabel() {
+      musicBtn.textContent = isPlaying() ? "⏸ Pause song" : "🎵 Play song";
+    }
+    function applySong() {
+      if (todayMp3) {
+        if (audio.getAttribute("src") !== todayMp3) {
+          audio.src = todayMp3;
+          if (wantMusic) audio.play().catch(() => {});
+        }
+      } else if (audio.getAttribute("src")) {
+        audio.pause();
+        audio.removeAttribute("src");
+        audio.load();
+      }
+      if (playerReady) {
+        if (!todayId || todayMp3) {
+          if (currentId) { player.stopVideo(); currentId = null; }
+        } else if (currentId !== todayId) {
+          currentId = todayId;
+          if (wantMusic) player.loadVideoById(todayId);
+          else player.cueVideoById(todayId);
+        }
+      }
+      setBtnLabel();
+    }
+    audio.addEventListener("play", setBtnLabel);
+    audio.addEventListener("pause", setBtnLabel);
+    window.onYouTubeIframeAPIReady = function () {
+      player = new YT.Player("ytPlayer", {
+        height: "200",
+        width: "200",
+        playerVars: { playsinline: 1, controls: 0, rel: 0 },
+        events: {
+          onReady: () => { playerReady = true; applySong(); },
+          onStateChange: (e) => {
+            if (e.data === 0) player.playVideo();
+            setBtnLabel();
+          }
+        }
+      });
+    };
+    const ytTag = document.createElement("script");
+    ytTag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(ytTag);
+    musicBtn.addEventListener("click", () => {
+      if (todayMp3) {
+        if (audio.paused) { wantMusic = true; audio.play().catch(() => {}); }
+        else { wantMusic = false; audio.pause(); }
+        return;
+      }
+      if (!playerReady) return;
+      if (player.getPlayerState() === 1) {
+        wantMusic = false;
+        player.pauseVideo();
+      } else {
+        wantMusic = true;
+        player.playVideo();
+      }
+    });
+    function updateMusic(day) {
+      const src = dailySongs[day];
+      todayId = src ? getYouTubeId(src) : null;
+      todayMp3 = src && !todayId ? src : null;
+      musicBtn.style.display = src ? "block" : "none";
+      applySong();
+    }
+    function updateCountdown() {
+      const remaining = Math.max(0, target - Date.now());
+      const values = [
+        Math.floor(remaining / 86400000),
+        Math.floor((remaining % 86400000) / 3600000),
+        Math.floor((remaining % 3600000) / 60000),
+        Math.floor((remaining % 60000) / 1000)
+      ];
+      const todayMessage = dailyMessages[values[0]] || defaultMessage;
+      document.querySelector(".message").textContent = todayMessage;
+      const img = document.getElementById("dailyImage");
+      const src = dailyImages[values[0]];
+      if (src) {
+        if (img.getAttribute("src") !== src) img.src = src;
+        img.style.display = "block";
+      } else {
+        img.style.display = "none";
+      }
+      updateMusic(values[0]);
+      ids.forEach((id, i) => {
+        document.getElementById(id).textContent = String(values[i]).padStart(2, "0");
+      });
+      if (remaining === 0 && !finished) {
+        finished = true;
+        document.querySelector(".eyebrow").textContent = "The day is here! 🎂";
+        document.getElementById("wrap").classList.add("done");
+        for (let i = 0; i < 40; i++) spawnHeart();
+      }
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>
